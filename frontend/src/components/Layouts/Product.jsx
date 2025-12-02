@@ -15,7 +15,6 @@ export default function Product() {
   const pageSize = 8;
   const dispatch = useDispatch();
 
-  const defaultCategories = ['Semua', 'Pakaian', 'Sepatu', 'Aksesoris', 'Elektronik', 'Tas'];
   // Base URL backend untuk gambar dengan path relatif.
   const apiBase = useMemo(
     () => (import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api').replace(/\/api\/?$/, ''),
@@ -32,6 +31,7 @@ export default function Product() {
 
   // Ambil kategori unik dari data produk (hasil populate) untuk filter.
   const categories = useMemo(() => {
+    const defaultCategories = ['Semua', 'Pakaian', 'Sepatu', 'Aksesoris', 'Elektronik', 'Tas']; // tetap stabil di dalam memo
     const dynamic = Array.from(
       new Set(
         products
@@ -40,7 +40,7 @@ export default function Product() {
       )
     );
     return dynamic.length ? ['Semua', ...dynamic] : defaultCategories;
-  }, [products, defaultCategories]); // sertakan defaultCategories agar lint hooks tidak protes
+  }, [products]); // dependency cukup pada products karena defaultCategories lokal memo
 
   // Pastikan setiap produk punya label kategori dan angka default untuk rating/sold/discount.
   const normalizedProducts = products.map((product) => ({
