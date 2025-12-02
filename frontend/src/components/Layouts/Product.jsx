@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import {  useMemo, useState } from 'react';
 import { Heart, Filter, Grid, List } from 'lucide-react';
 import { useProduct } from '../../hooks/product';
 import { useDispatch } from 'react-redux';
@@ -40,7 +40,7 @@ export default function Product() {
       )
     );
     return dynamic.length ? ['Semua', ...dynamic] : defaultCategories;
-  }, [products]);
+  }, [products, defaultCategories]); // sertakan defaultCategories agar lint hooks tidak protes
 
   // Pastikan setiap produk punya label kategori dan angka default untuk rating/sold/discount.
   const normalizedProducts = products.map((product) => ({
@@ -74,10 +74,17 @@ export default function Product() {
     }
   });
 
-  // Reset halaman ketika filter/sort berubah agar kembali ke halaman pertama.
-  useEffect(() => {
+  // Handler kategori: ubah kategori dan reset pagination ke halaman 1
+  const handleCategoryChange = (cat) => {
+    setSelectedCategory(cat);
     setCurrentPage(1);
-  }, [selectedCategory, sortBy, products.length]);
+  };
+
+  // Handler sort: ubah urutan dan reset pagination ke halaman 1
+  const handleSortChange = (value) => {
+    setSortBy(value);
+    setCurrentPage(1);
+  };
 
   const totalPages = Math.max(1, Math.ceil(sortedProducts.length / pageSize));
   const paginatedProducts = sortedProducts.slice(
@@ -146,7 +153,7 @@ export default function Product() {
                   {categories.map((cat) => (
                     <button
                       key={cat}
-                      onClick={() => setSelectedCategory(cat)}
+                      onClick={() => handleCategoryChange(cat)}
                       className={`block w-full text-left px-3 py-2 rounded-lg transition ${
                         selectedCategory === cat
                           ? 'bg-indigo-500/30 text-white font-medium border border-indigo-300/40'
@@ -213,15 +220,15 @@ export default function Product() {
                   {/* Sort */}
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-slate-200">Urutkan:</span>
-                    <select 
-                      className="border border-white/10 bg-slate-900/60 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                    >
-                      <option value="popular">Terpopuler</option>
-                      <option value="newest">Terbaru</option>
-                      <option value="price-low">Harga Terendah</option>
-                      <option value="price-high">Harga Tertinggi</option>
+                  <select 
+                    className="border border-white/10 bg-slate-900/60 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={sortBy}
+                    onChange={(e) => handleSortChange(e.target.value)}
+                  >
+                    <option value="popular">Terpopuler</option>
+                    <option value="newest">Terbaru</option>
+                    <option value="price-low">Harga Terendah</option>
+                    <option value="price-high">Harga Tertinggi</option>
                       <option value="rating">Rating Tertinggi</option>
                     </select>
                   </div>
