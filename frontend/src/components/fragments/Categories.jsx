@@ -1,6 +1,24 @@
-// Daftar kategori cepat di beranda
+import { useMemo } from "react";
+import { useProduct } from "../../hooks/product";
+
+// Daftar kategori cepat di beranda (ambil dari data produk)
 export const CategoriesSection = () => {
-  const categories = ['Pakaian', 'Sepatu', 'Aksesoris', 'Elektronik', 'Olahraga', 'Rumah Tangga'];
+  const { products } = useProduct();
+  // Ambil kategori unik dari produk (fallback ke default jika kosong)
+  const categories = useMemo(() => {
+    const dynamic = Array.from(
+      new Set(
+        products
+          .map((p) => {
+            if (!p?.category) return null;
+            if (typeof p.category === 'object' && p.category.name) return p.category.name;
+            return p.category;
+          })
+          .filter(Boolean)
+      )
+    );
+    return dynamic.length ? dynamic : ['Pakaian', 'Sepatu', 'Aksesoris', 'Elektronik', 'Olahraga', 'Rumah Tangga'];
+  }, [products]);
   
   return (
     <section className="relative w-full bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-900 text-white">

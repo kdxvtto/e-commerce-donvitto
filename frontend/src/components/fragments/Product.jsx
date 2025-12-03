@@ -1,9 +1,14 @@
 import { Heart } from 'lucide-react';
 import { useProduct } from '../../hooks/product';
+import { Link, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectAuth } from '../../redux/slice/loginSlice';
 
 // Grid produk populer di beranda (ambil dari hook useProduct)
 export const ProductsSection = ({ onAddToCart }) => {
   const { products, loading, error } = useProduct();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useSelector(selectAuth);
 
   // Batasi hanya menampilkan sebagian produk (contoh: 10 item teratas)
   const visibleProducts = Array.isArray(products) ? products.slice(0, 10) : [];
@@ -49,12 +54,12 @@ export const ProductsSection = ({ onAddToCart }) => {
             <h3 className="text-3xl font-bold text-white">Produk Populer Minggu Ini</h3>
             <p className="text-sm text-slate-200/90">Kurasi cepat buat kamu yang pengen langsung checkout.</p>
           </div>
-          <a
-            href="/products"
+          <Link to ="/product"
+            
             className="px-4 py-2 rounded-full bg-indigo-500/80 text-white hover:bg-indigo-400/80 transition text-sm font-semibold border border-white/15 shadow"
           >
             Lihat Semua
-          </a>
+          </Link>
         </div>
 
         {error && (
@@ -102,7 +107,10 @@ export const ProductsSection = ({ onAddToCart }) => {
                         )}
                       </div>
                       <button
-                        onClick={() => onAddToCart?.(product)}
+                        onClick={() => {
+                          if (!isAuthenticated) return navigate('/login');
+                          onAddToCart?.(product);
+                        }}
                         className="w-full mt-2 bg-indigo-500/90 text-white py-2 rounded-xl hover:bg-indigo-400/80 transition font-semibold border border-white/10"
                       >
                         Tambah ke Keranjang

@@ -1,8 +1,10 @@
 import {  useMemo, useState } from 'react';
 import { Heart, Filter, Grid, List } from 'lucide-react';
 import { useProduct } from '../../hooks/product';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../../redux/slice/cartSlice';
+import { selectAuth } from '../../redux/slice/loginSlice';
+import { useNavigate } from 'react-router-dom';
 
 // Halaman katalog produk dengan filter sederhana
 export default function Product() {
@@ -14,6 +16,8 @@ export default function Product() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 8;
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useSelector(selectAuth);
 
   // Base URL backend untuk gambar dengan path relatif.
   const apiBase = useMemo(
@@ -120,6 +124,10 @@ export default function Product() {
 
   // Kirim produk yang diklik ke Redux cart
   const handleAddToCart = (product) => {
+    if (!isAuthenticated) {
+      navigate('/login'); // arahkan ke login jika belum autentik
+      return;
+    }
     dispatch(addToCart(product));
   };
 

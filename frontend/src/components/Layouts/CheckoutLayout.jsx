@@ -254,27 +254,33 @@ export const CheckoutLayout = () => {
 
               {/* Cart Items */}
               <div className="space-y-4 mb-4 pb-4 border-b border-white/10">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="flex gap-3">
-                    <img 
-                      src={item.image} 
-                      alt={item.name}
-                      className="w-16 h-16 rounded-lg object-cover"
-                    />
-                    <div className="flex-1">
-                      <p className="font-semibold text-sm text-white line-clamp-2 mb-1">
-                        {item.name}
-                      </p>
-                      <p className="text-xs text-slate-200 mb-1">{item.variant}</p>
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm text-slate-300">x{item.quantity}</p>
-                        <p className="font-bold text-sm text-indigo-100">
-                          {formatPrice(item.price * item.quantity)}
+                {cartItems.length === 0 ? (
+                  <div className="text-sm text-slate-200 bg-white/5 border border-white/10 rounded-lg p-4">
+                    Keranjang masih kosong. Silakan tambahkan produk terlebih dahulu.
+                  </div>
+                ) : (
+                  cartItems.map((item) => (
+                    <div key={item.id} className="flex gap-3">
+                      <img 
+                        src={item.image} 
+                        alt={item.name}
+                        className="w-16 h-16 rounded-lg object-cover"
+                      />
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm text-white line-clamp-2 mb-1">
+                          {item.name}
                         </p>
+                        <p className="text-xs text-slate-200 mb-1">{item.variant}</p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm text-slate-300">x{item.quantity}</p>
+                          <p className="font-bold text-sm text-indigo-100">
+                            {formatPrice(item.price * item.quantity)}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
 
               {/* Price Details */}
@@ -296,14 +302,18 @@ export const CheckoutLayout = () => {
 
               {/* Checkout Button */}
               <button
-                disabled={!selectedPayment}
+                disabled={!selectedPayment || cartItems.length === 0}
                 className={`w-full py-4 rounded-xl font-bold text-white transition ${
-                  selectedPayment
+                  selectedPayment && cartItems.length > 0
                     ? 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700'
                     : 'bg-slate-600 cursor-not-allowed'
                 }`}
               >
-                {selectedPayment ? 'Bayar Sekarang' : 'Pilih Metode Pembayaran'}
+                {cartItems.length === 0
+                  ? 'Keranjang kosong'
+                  : selectedPayment
+                    ? 'Bayar Sekarang'
+                    : 'Pilih Metode Pembayaran'}
               </button>
 
               <p className="text-xs text-slate-300 text-center mt-4">
