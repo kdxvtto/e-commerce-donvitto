@@ -42,8 +42,8 @@ const addOrder = async (req,res) =>{
         if (!userId) {
             return res.status(401).json({ message: 'Unauthorized' });
         }
-        // Ambil item & opsi kirim dari body (user dari token, orderNumber auto)
-        const { items = [], shippingOptions } = req.body;
+        // Ambil item, pengiriman, dan metode bayar dari body (user dari token, orderNumber auto)
+        const { items = [], shippingOptions, paymentMethod } = req.body;
 
         // Guard: harus ada item di keranjang
         if (!Array.isArray(items) || items.length === 0) {
@@ -52,6 +52,10 @@ const addOrder = async (req,res) =>{
         // Guard: wajib pilih jenis pengiriman
         if (!shippingOptions) {
             return res.status(400).json({ message: 'Shipping option is required' });
+        }
+        // Guard: wajib pilih metode pembayaran
+        if (!paymentMethod) {
+            return res.status(400).json({ message: 'Payment method is required' });
         }
 
         // Normalisasi item dan hitung subtotal per item
@@ -82,6 +86,7 @@ const addOrder = async (req,res) =>{
             items: normalizedItems,
             totalAmount,
             shippingOptions,
+            paymentMethod,
             status : 'pending'
         });
         const newOrder = await order.save();

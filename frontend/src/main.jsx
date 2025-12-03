@@ -9,6 +9,7 @@ import { ProductPages } from './pages/ProductPages'
 import { AboutPage } from './pages/AboutPage'
 import { Provider } from 'react-redux'
 import { store } from './redux/store'
+import { CheckoutPage } from './pages/CheckoutPage'
 
 // Definisikan semua rute halaman aplikasi
 const router = createBrowserRouter([
@@ -31,7 +32,11 @@ const router = createBrowserRouter([
   {
     path: "/about",
     element: <AboutPage />,
-  }
+  },
+  {
+    path: "/checkout",
+    element: <CheckoutPage />,
+  },
 ])
 
 // Render root React dengan Redux Provider dan Router

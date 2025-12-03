@@ -13,6 +13,8 @@ import categoryRoutes from './routes/categoryRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
+import shippingRoutes from './routes/shippingRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -43,6 +45,8 @@ app.use('/api/products', productRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/authentication', authRoutes);
 app.use('/api/order', orderRoutes);
+app.use('/api/payment-methods', paymentRoutes); // daftar metode pembayaran (dinamis)
+app.use('/api/shipping-methods', shippingRoutes); // daftar metode pengiriman (dinamis)
 
 // Connect database
 

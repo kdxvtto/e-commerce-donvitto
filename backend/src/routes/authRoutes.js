@@ -13,6 +13,6 @@ const router = express.Router();
 router.post("/register", register)
 router.post("/login", login)
 router.post("/logout/", verifyToken, logout)
-router.get("/me", userProfile)
+router.get("/me", verifyToken, userProfile) // profil butuh token
 
 export default router

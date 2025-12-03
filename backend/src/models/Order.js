@@ -36,6 +36,14 @@ const orderSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    shippingOptions: {
+        type: String,
+        required: true
+    },
+    paymentMethod: {
+        type: String,
+        required: true // simpan kode metode bayar yang dipilih user
+    },
     status: {
         type: String,
         enum: ['pending', 'delivered'],

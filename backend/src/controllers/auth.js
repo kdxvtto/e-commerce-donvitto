@@ -88,6 +88,7 @@ const login = async (req,res) => {
         if (admin){
             const isMatch = await bcrypt.compare(password, admin.password)
             if(isMatch){
+                const adminSafe = await Admin.findById(admin._id).select('-password');
                 const token = jsonwebtoken.sign({ 
                     id: admin._id, role: 'admin' 
                     }, 
@@ -98,7 +99,8 @@ const login = async (req,res) => {
                     return res.status(200).json({ 
                         success : true,
                         message: 'Login successful', 
-                        token 
+                        token,
+                        user: adminSafe
                 });
             }
             else{
@@ -113,6 +115,7 @@ const login = async (req,res) => {
         if (user){
             const isMatch = await bcrypt.compare(password, user.password)
             if(isMatch){
+                const userSafe = await User.findById(user._id).select('-password');
                 const token = jsonwebtoken.sign({ 
                     id: user._id, role: 'user' 
                     }, 
@@ -123,7 +126,8 @@ const login = async (req,res) => {
                     return res.status(200).json({ 
                         success : true,
                         message: 'Login successful', 
-                        token 
+                        token,
+                        user: userSafe
                 });
             } else {
                 return res.status(401).json({
@@ -177,9 +181,27 @@ const logout = async (req,res) => {
 // Placeholder profil user (hanya contoh response)
 const userProfile = async (req,res) => {
     try {
+        // Ambil id user dari token
+        const userId = req.user?.id;
+        if(!userId){
+            return res.status(401).json({
+                success: false,
+                message: 'Unauthorized'
+            });
+        }
+        // Cari user biasa dulu, kalau tidak ada cek admin
+        const user = await User.findById(userId).select('-password');
+        const admin = !user ? await Admin.findById(userId).select('-password') : null;
+        const profile = user || admin;
+        if(!profile){
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
         res.status(200).json({ 
             success : true,
-            message: 'User profile' 
+            data: profile
         });
     } catch (error) {
         res.status(500).json({ 

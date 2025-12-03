@@ -1,16 +1,25 @@
-import { ShoppingCart, Search, Menu, Heart, User } from 'lucide-react';
+import { ShoppingCart, Search, Menu, User } from 'lucide-react';
 import { Input } from '../elements/Input/Input';
 import { useDispatch, useSelector } from 'react-redux';
-import { logout, selectAuth } from '../../redux/slice/loginSlice';
+import { logout, selectAuth, fetchProfile } from '../../redux/slice/loginSlice';
 import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 
 export const NavbarLayout = () => {
   // Ambil status auth untuk mengatur tombol login/logout
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated, loading } = useSelector(selectAuth);
+  const { isAuthenticated, loading, profile } = useSelector(selectAuth);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   // Ambil total item di keranjang dari Redux
   const totalQuantity = useSelector(state => state.cart.cartTotalQuantity ?? 0);
+
+  // Pastikan profil di-load setelah login, supaya alamat/nama bisa dipakai di halaman lain
+  useEffect(() => {
+    if (isAuthenticated && !profile) {
+      dispatch(fetchProfile());
+    }
+  }, [isAuthenticated, profile, dispatch]);
 
   // Logout user, bersihkan token, dan arahkan ke halaman login
   const handleLogout = () => {
@@ -57,22 +66,59 @@ export const NavbarLayout = () => {
                       </Link>
                     )}
                     
-                    <button className="p-2 hover:bg-white/10 rounded-full transition">
-                    <Heart className="w-6 h-6 text-slate-200" />
-                    </button>
-                    
-                    <button className="p-2 hover:bg-white/10 rounded-full transition">
-                    <User className="w-6 h-6 text-slate-200" />
-                    </button>
-                    
-                    <button className="p-2 hover:bg-white/10 rounded-full relative transition">
-                    <ShoppingCart className="w-6 h-6 text-slate-200" />
-                    {totalQuantity > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-emerald-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {totalQuantity}
+                    {/* User dropdown */}
+                    <div className="relative hidden md:block">
+                      <button
+                        className="flex items-center gap-2 px-3 py-2 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition"
+                        onClick={() => setIsUserMenuOpen((prev) => !prev)}
+                      >
+                        <User className="w-5 h-5 text-slate-200" />
+                        <span className="text-sm text-slate-100">
+                          {profile?.name || 'Guest'}
                         </span>
-                    )}
-                    </button>
+                      </button>
+                      {isUserMenuOpen && (
+                        <div className="absolute right-0 mt-2 w-48 bg-slate-900/90 border border-white/10 rounded-xl shadow-xl backdrop-blur z-50">
+                          <div className="px-4 py-3 border-b border-white/10">
+                            <p className="text-sm text-slate-200 font-semibold">
+                              {profile?.name || 'Guest'}
+                            </p>
+                            <p className="text-xs text-slate-400">
+                              {profile?.email || 'Belum login'}
+                            </p>
+                          </div>
+                          {isAuthenticated ? (
+                            <button
+                              onClick={handleLogout}
+                              disabled={loading}
+                              className="w-full text-left px-4 py-3 text-sm text-rose-200 hover:bg-rose-500/10"
+                            >
+                              {loading ? '...' : 'Logout'}
+                            </button>
+                          ) : (
+                            <Link
+                              to="/login"
+                              className="block px-4 py-3 text-sm text-indigo-200 hover:bg-indigo-500/10"
+                            >
+                              Masuk
+                            </Link>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <Link
+                      to="/checkout"
+                      className="p-2 hover:bg-white/10 rounded-full relative transition"
+                      aria-label="Buka keranjang/checkout"
+                    >
+                      <ShoppingCart className="w-6 h-6 text-slate-200" />
+                      {totalQuantity > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-emerald-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                          {totalQuantity}
+                        </span>
+                      )}
+                    </Link>
                     
                     <button className="md:hidden">
                     <Menu className="w-6 h-6" />

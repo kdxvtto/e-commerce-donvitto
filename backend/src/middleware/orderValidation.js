@@ -17,6 +17,7 @@ const addOrderValidation = [
     body('items.*.quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
     body('items.*.price').isNumeric().withMessage('Price must be a number'),
     body('shippingOptions').isString().withMessage('Shipping option is required'),
+    body('paymentMethod').isString().withMessage('Payment method is required'),
     validate
 ];
 
@@ -27,6 +28,7 @@ const updateOrderValidation = [
     body('items.*.quantity').optional().isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
     body('items.*.price').optional().isNumeric().withMessage('Price must be a number'),
     body('shippingOptions').optional().isString().withMessage('Shipping option must be a string'),
+    body('paymentMethod').optional().isString().withMessage('Payment method must be a string'),
     body('status').optional().isString().withMessage('Status must be a string'),
     validate
 ];

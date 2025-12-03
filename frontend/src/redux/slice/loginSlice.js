@@ -1,7 +1,6 @@
 import {createSlice, createAsyncThunk} from "@reduxjs/toolkit";
 import { api } from "../../lib/api";
 
-
 // Ambil token dari localStorage jika ada (agar sesi tetap hidup saat refresh)
 const tokenFromStorage = localStorage.getItem("token") || null;
 if(tokenFromStorage){
@@ -15,10 +14,11 @@ export const loginUser = createAsyncThunk(
         try{
             const res = await api.post("/auth/login", {email, password});
             const token = res.data?.token; // ini yang akan menjadi payload
+            const profile = res.data?.user; // user data dari backend
             if(!token){
                 return rejectWithValue("Token not found");
             }
-            return {token};
+            return {token, profile};
         }catch(err){
             const msg = err.response?.data?.message || "Login gagal, periksa email/password";
             return rejectWithValue(msg);
@@ -40,13 +40,28 @@ export const registerUser = createAsyncThunk(
     }
 )
 
+// Thunk untuk ambil profil user dari backend (butuh token)
+export const fetchProfile = createAsyncThunk(
+    "auth/profile",
+    async(_, { rejectWithValue }) => {
+        try{
+            const res = await api.get("/auth/me");
+            return res.data?.data;
+        }catch(err){
+            const msg = err.response?.data?.message || "Gagal memuat profil";
+            return rejectWithValue(msg);
+        }
+    }
+)
+
 // State awal auth
 const initialState = {
     token : tokenFromStorage,           // JWT aktif (jika ada)
     isAuthenticated : !!tokenFromStorage, // boolean status login
     loading : false,                    // indikator request in-flight
     errors : null,                      // pesan error login/register
-    registerSuccess : false // flag sukses daftar (untuk redirect)
+    registerSuccess : false, // flag sukses daftar (untuk redirect)
+    profile : null           // data profil user (name/email/address)
 }
 
 // Slice auth: handle login/logout
@@ -81,7 +96,7 @@ const authSlice = createSlice({
             state.isAuthenticated = true;
             state.errors = null;
             state.registerSuccess = false;
-
+            state.profile = action.payload.profile || null; // simpan profil jika dikirim backend
             localStorage.setItem("token", action.payload.token); // simpan token
             api.defaults.headers.common["Authorization"] = `Bearer ${action.payload.token}`; // set header default
         })
@@ -106,6 +121,19 @@ const authSlice = createSlice({
             state.loading = false; // selesai request
             state.registerSuccess = false;
             state.errors = action.payload || "Register gagal, periksa data Anda"; // simpan error
+        })
+        .addCase(fetchProfile.pending, (state) => {
+            state.loading = true; // mulai ambil profil
+            state.errors = null;
+        })
+        .addCase(fetchProfile.fulfilled, (state, action) => {
+            state.loading = false; // profil berhasil diambil
+            state.profile = action.payload || null; // simpan profil user ke state
+        })
+        .addCase(fetchProfile.rejected, (state, action) => {
+            state.loading = false; // gagal ambil profil
+            state.profile = null; // kosongkan profil
+            state.errors = action.payload || "Gagal memuat profil"; // simpan pesan error
         })
     }
 })
